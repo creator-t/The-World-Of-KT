@@ -1,8 +1,67 @@
-Get about date 
+# Get about date 
 
+        ```
         let d = new Date();
         let year = d.getFullYear();
         // let month = d.getMonth();
         let day = d.getDay();
         let month = d.getUTCMonth() + 1;
         let UTCDate = d.getDate();
+        ```
+
+# How could we call APEX in LWC
+
+        in APEX Class 
+
+        ```/**
+        * @description
+        */
+        public with sharing class UseWire {
+        /**
+        * @description getContacts description
+        * @return   return List<Contact> contacts
+        */
+        @AuraEnabled(cacheable=true)
+        public static List<Contact> getContacts() {
+                try {
+                List<Contact> contacts = [
+                        SELECT AccountId, Email, Phone
+                        FROM Contact
+                ];
+                return contacts;
+                } catch (Exception e) {
+                throw new AuraHandledException(e.getMessage());
+                }
+        }
+        // public useWire() {
+
+        // }
+        }```
+        In LWC JS
+        ```
+        import { LightningElement, wire } from "lwc";
+        import getContacts from "@salesforce/apex/UseWire.getContacts";
+        import refreshApex from "@salesforce/apex";
+        export default class sfdxDisplayContacts extends LightningElement {
+                contacts;
+                error;
+
+                @wire(getContacts)
+                wiredContacts({ error, data }) {
+                        console.log("this.wiredContacts: ", { error, data });
+                        if (data) {
+                        this.contacts = data;
+                        this.error = undefined;
+                        } else if (error) {
+                        this.error = error;
+                        this.contacts = undefined;
+                        }
+                }
+                refreshContact() {
+                        refreshApex(this.wiredContacts);
+                }
+        }
+        ```
+# How Could RefreshApex in the before.
+
+
