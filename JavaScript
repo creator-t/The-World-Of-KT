@@ -1,0 +1,8 @@
+Get about date 
+
+        let d = new Date();
+        let year = d.getFullYear();
+        // let month = d.getMonth();
+        let day = d.getDay();
+        let month = d.getUTCMonth() + 1;
+        let UTCDate = d.getDate();
