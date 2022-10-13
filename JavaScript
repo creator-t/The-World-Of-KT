@@ -90,6 +90,8 @@
         git config --global user.email "you@example.com"
         git config --global user.name "Your Name"
         ```
+        ```
+        the point is PWC blocks access to github, so log in to GitHub on your browser first, then sync.
 
 
 
