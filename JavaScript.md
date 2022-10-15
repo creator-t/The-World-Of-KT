@@ -13,7 +13,7 @@
 
         in APEX Class
 
-        ```
+```
         /**
         * @description
         */
@@ -40,6 +40,7 @@
         }
 
 ```
+
         In LWC JS
 
 ```
@@ -440,18 +441,5 @@
         */
         </script>
         </html>
-
-```
-
-```
-
-git status
-git add
-git commit
-
-```
-
-
-
 
 ```
