@@ -11,7 +11,7 @@
 
 # How could we call APEX in LWC
 
-        in APEX Class
+in APEX Class
 
 ```
         /**
@@ -41,7 +41,7 @@
 
 ```
 
-        In LWC JS
+In LWC JS
 
 ```
 
@@ -76,7 +76,7 @@
 
 ## unable to access 'https://github.com/creator-t/The-World-Of-tk.git/': SSL certificate problem: self signed certificate in certificate chain
 
-        Open Git Bash and run the command if you want to completely disable SSL verification.
+Open Git Bash and run the command if you want to completely disable SSL verification.
 
 ```
 
@@ -84,7 +84,7 @@
 
 ```
 
-        Note: This solution opens you to attacks like man-in-the-middle attacks. Therefore turn on verification again as soon as possible:
+Note: This solution opens you to attacks like man-in-the-middle attacks. Therefore turn on verification again as soon as possible:
 
 ```
 
@@ -92,8 +92,8 @@
 
 ```
 
-        I edited the Git config text file
-        C:\Users\ktian019\.gitconfig(PWC's computer)
+I edited the Git config text file
+C:\Users\ktian019\.gitconfig(PWC's computer)
 
 ## fatal: unable to update url base from redirection:asked for: https://github.com/creator-t/The-World-Of-tk.git/info/refs?service=git-upload-pack redirect: http://20.205.243.166:6080/php/urlblock.php?args=AAAAdwAAABD1g1qsIMdXkmuj8XFsDa71AAAAEBuxrr~3vihwHGfXWfc~KucAAABHAAAAR7N0GUoICYSeh7z~iNQoJbFO4wLDqFZWEl5UAdKKCjgFnZ202k38TV67L1ABrcdQD1EK~oGi9ky~unYZEqRMPuiTPXXwqDEw&url=https://github.com%2fcreator-t%2fThe-World-Of-tk.git%2finfo%2frefs%3fservice%3dgit-upload-pack
 
@@ -105,14 +105,14 @@
 
 ```
 
-        the point is PWC blocks access to github, so log in to GitHub on your browser first, then sync.
+the point is PWC blocks access to github, so log in to GitHub on your browser first, then sync.
 
 # LWC Communication https://lwc.dev/guide/composition
 
 ## Parent to child
 
-        First Step:
-                Child:  use @api to expose public variables and/or functions
+First Step:
+Child: use @api to expose public variables and/or functions
 
 ```
 
@@ -129,13 +129,10 @@
 
 ```
 
-        Second Step:
-                Parent: pass variable in tag, and gain lwc dom to operate public function in js.
-
-
-        @api
-
-        unended
+Second Step:
+Parent: pass variable in tag, and gain lwc dom to operate public function in js.
+@api
+unended
 
 # Salesforce defined name about APEX Class and LWC
 
