@@ -136,8 +136,8 @@ unended
 
 # Salesforce defined name about APEX Class and LWC
 
-        Use the project name as a prefix, followed by the class name or the name of the LWC, depending on the name.
-        such as:
+Use the project name as a prefix, followed by the class name or the name of the LWC, depending on the name.
+such as:
 
 ```
 
@@ -168,16 +168,16 @@ unended
 
 # Delete a LWC From Project
 
-        First step:Deploy source to org
-        Second step:Delete from project and org(Delete else thing in org such as:page etc.)
+First step:Deploy source to org
+Second step:Delete from project and org(Delete else thing in org such as:page etc.)
 
 # Documentation about salesforce
 
-        https://pmd.github.io/latest/pmd_rules_apex_documentation.html
+https://pmd.github.io/latest/pmd_rules_apex_documentation.html
 
 # Use VPN
 
-        https://github.com/vpncn/vpncn.github.io
+https://github.com/vpncn/vpncn.github.io
 
 # Calendar
 
@@ -438,7 +438,6 @@ unended
         */
         </script>
         </html>
-
 ```
 # my date
 ```
@@ -535,4 +534,4 @@ export default class sfdxDate extends LightningElement {
     connectedCallback() {
         this.main();
     }
-    ```
+```
