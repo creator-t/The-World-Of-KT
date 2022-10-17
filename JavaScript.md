@@ -440,3 +440,99 @@ unended
         </html>
 
 ```
+# my date
+```
+import { LightningElement, track, wire } from "lwc";
+import GetHolidays from "@salesforce/apex/SFDX_Holidays.getHolidays";
+
+export default class sfdxDate extends LightningElement {
+    // d = new Date();
+    // year = this.d.getFullYear();
+
+    holidays;
+    error;
+    @wire(GetHolidays)
+    wiredHolidays({ data, error }) {
+        if (data) {
+            this.holidays = data;
+            this.error = undefined;
+        } else if (error) {
+            this.error = error;
+            this.holidays = undefined;
+        }
+    }
+    //获取当前月份的1号是星期几
+    getDays = function (year, month) {
+        var d = new Date(year, month - 1, 1).getDay();
+        return d;
+    };
+    //获取当前月份有几天
+    getDatesOfMonth = function (year, month) {
+        var d = new Date(year, month, 0); // 创建日期对象
+        return d.getDate(); //获取日期的天数
+    };
+
+    showDates = function () {
+        let d1 = this.getDays(2022, 10);
+        let d = this.getDays(this.year, this.month);
+        let days = this.getDatesOfMonth(this.year, this.month);
+        // let Dates = Array.apply(null, { length: 42 });
+        let Dates = Array(42).fill(0);
+        console.log("year:" + this.year, "month:" + this.month);
+        console.log(Dates[11], "3333");
+        console.log(d1, d, days, "5555");
+        for (let index = 6; index < 32; index++) {
+            Dates[index] = index - 6 + 1;
+        }
+        console.log(Dates[11], "4444");
+        return Dates;
+    };
+    @track
+    // Dates = this.showDates.Dates;
+    Dates = this.showDates();
+    testDay = 12;
+
+    years = [];
+    initView = function () {
+        // let oYear0 = this.template.querySelector(".select");
+        // let oYear = this.template.getElementsByClassName("slds-select");
+        // let oYear1 = this.template.querySelectorAll("select");
+        // console.log(oYear0, oYear1);
+        //console.log(oYear.Type, oYear1.Type);
+        //2.循环创建年份
+        for (let year = 1990; year <= 3000; year++) {
+            //oYear.appendChild(new Option(year,year));
+            // this.createOption(year, year, oYear);
+            this.years.push(year);
+            // oYear.options[year] = new Option(year, year);
+            // oYear.appendChild(new Option(year, year));
+        }
+        this.showDates();
+    };
+    main = function () {
+        //获取当前实时年月日
+        let now = new Date();
+
+        //获取当前日期中的年
+        let year = now.getFullYear();
+
+        //获取当前的月份 只能为0-11，所以后面+1
+        let month = now.getMonth() + 1;
+        //获取当前的日
+        let day = now.getDate();
+
+        console.log(year);
+        console.log(year, month, day);
+
+        this.initView();
+    };
+    @track
+    year = this.main.year;
+
+    @track
+    month = this.main.month;
+
+    connectedCallback() {
+        this.main();
+    }
+    ```
