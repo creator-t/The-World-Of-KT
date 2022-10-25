@@ -439,7 +439,9 @@ https://github.com/vpncn/vpncn.github.io
         </script>
         </html>
 ```
+
 # my date
+
 ```
 import { LightningElement, track, wire } from "lwc";
 import GetHolidays from "@salesforce/apex/SFDX_Holidays.getHolidays";
@@ -534,4 +536,118 @@ export default class sfdxDate extends LightningElement {
     connectedCallback() {
         this.main();
     }
+```
+
+# Test class practice
+
+## Mock [Testing HTTP Callouts by Implementing the HttpCalloutMock Interface](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_restful_http_testing_httpcalloutmock.htm)
+
+Implementing Class
+
+```
+/**
+ * CGC_SI3PricingWS_Test
+ *
+ * @author Kai Tian
+ * @date 10/25/2022
+ * @description test class for CGC_SI3PricingWS
+ */
+public with sharing class CGC_SI3PricingWS_Test implements HttpCalloutMock{
+    /**
+     * @description respond description
+     * @param  req req description
+     * @return     return description
+     */
+    public HttpResponse respond(HttpRequest req) {
+
+        CGC_SI3PricingWS.SI3PricingModel objSI3PM = new CGC_SI3PricingWS.SI3PricingModel();
+        CGC_SI3PricingWS.SI3ProductPricing objSI3PP01 = new CGC_SI3PricingWS.SI3ProductPricing();
+        objSI3PP01.CompanyId=01;
+        objSI3PP01.ClientId='01';
+        objSI3PP01.Sku='01';
+        objSI3PP01.InitialPrice=10;
+        objSI3PP01.Taxes=0.8;
+        objSI3PP01.OninvoiceDiscounts=0.8;
+        objSI3PP01.OffinvoiceDiscounts=0.9;
+        objSI3PP01.Sfp=10;
+        objSI3PP01.Promochain=10;
+        objSI3PP01.MaxEuroBottle=10;
+        objSI3PP01.MaxEuroBottle_Promochain=10;
+        objSI3PP01.MaxEuroBottle_SFP=10;
+
+        CGC_SI3PricingWS.SI3ProductPricing objSI3PP02 = new CGC_SI3PricingWS.SI3ProductPricing();
+        objSI3PP01.CompanyId=02;
+        objSI3PP01.ClientId='02';
+        objSI3PP01.Sku='02';
+        objSI3PP01.InitialPrice=10;
+        objSI3PP01.Taxes=0.8;
+        objSI3PP01.OninvoiceDiscounts=0.8;
+        objSI3PP01.OffinvoiceDiscounts=0.9;
+        objSI3PP01.Sfp=10;
+        objSI3PP01.Promochain=10;
+        objSI3PP01.MaxEuroBottle=10;
+        objSI3PP01.MaxEuroBottle_Promochain=10;
+        objSI3PP01.MaxEuroBottle_SFP=10;
+
+        CGC_SI3PricingWS.SI3ProductPricing objSI3PP03 = new CGC_SI3PricingWS.SI3ProductPricing();
+        objSI3PP01.CompanyId=03;
+        objSI3PP01.ClientId='03';
+        objSI3PP01.Sku='03';
+        objSI3PP01.InitialPrice=10;
+        objSI3PP01.Taxes=0.8;
+        objSI3PP01.OninvoiceDiscounts=0.8;
+        objSI3PP01.OffinvoiceDiscounts=0.9;
+        objSI3PP01.Sfp=10;
+        objSI3PP01.Promochain=10;
+        objSI3PP01.MaxEuroBottle=10;
+        objSI3PP01.MaxEuroBottle_Promochain=10;
+        objSI3PP01.MaxEuroBottle_SFP=10;
+
+        objSI3PM.data.add(objSI3PP01);
+        objSI3PM.data.add(objSI3PP02);
+        objSI3PM.data.add(objSI3PP03);
+        String strBody= JSON.serialize(objSI3PM);
+
+        HttpResponse objRes = new HttpResponse();
+        objRes.setHeader('Content-Type', 'application/json');
+        objRes.setBody(strBody);
+        objRes.setStatusCode(200);
+        return objRes;
+
+    }
+
+
+
+}
+```
+
+TestClass
+
+```
+@isTest
+private class CalloutClassTest {
+     @isTest static void testCallout() {
+        // Set mock callout class
+        Test.setMock(HttpCalloutMock.class, new MockHttpResponseGenerator());
+
+        // Call method to test.
+        // This causes a fake response to be sent
+        // from the class that implements HttpCalloutMock.
+        HttpResponse res = CalloutClass.getInfoFromExternalService();
+
+        // Verify response received contains fake values
+        String contentType = res.getHeader('Content-Type');
+        System.assert(contentType == 'application/json');
+        String actualValue = res.getBody();
+        String expectedValue = '{"example":"test"}';
+        System.assertEquals(actualValue, expectedValue);
+        System.assertEquals(200, res.getStatusCode());
+    }
+}
+```
+
+## [JSON serialize](https://developer.salesforce.com/docs/atlas.en-us.apexref.meta/apexref/apex_class_System_Json.htm#apex_System_Json_serialize)
+
+```
+String strBody = JSON.serialize(objModel);
 ```
