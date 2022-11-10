@@ -651,3 +651,11 @@ private class CalloutClassTest {
 ```
 String strBody = JSON.serialize(objModel);
 ```
+# recovery computer 
+dowload windows IOS ([use MSDN](https://msdn.itellyou.cn/))xunlei dowload it 
+open the file with Windows Explorer and excute with admin user right click setup.exe .
+
+# 磁盘分区
+右键我的电脑，找到磁盘分区，进行操作
+
+
