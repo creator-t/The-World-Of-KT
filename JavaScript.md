@@ -658,4 +658,7 @@ open the file with Windows Explorer and excute with admin user right click setup
 # 磁盘分区
 右键我的电脑，找到磁盘分区，进行操作
 
-
+# view Windows activation key
+```
+wmic path softwarelicensingservice get OA3xOriginalProductKey
+```
