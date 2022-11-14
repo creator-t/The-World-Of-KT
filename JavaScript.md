@@ -655,10 +655,17 @@ String strBody = JSON.serialize(objModel);
 dowload windows IOS ([use MSDN](https://msdn.itellyou.cn/))xunlei dowload it 
 open the file with Windows Explorer and excute with admin user right click setup.exe .
 
-# 磁盘分区
-右键我的电脑，找到磁盘分区，进行操作
+# disk partition
+Right-click my computer, find the disk partition, and operate
 
 # view Windows activation key
 ```
 wmic path softwarelicensingservice get OA3xOriginalProductKey
 ```
+# [Map in JavaScript ](https://www.sfdcblogs.com/post/useful-javascript-s-methods-in-lwc-and-lightning-component-part-ii)
+
+# [ Salesforce Apex Guide ](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_dev_guide.htm)
+
+# [Pyramid Principle](https://www.youtube.com/watch?v=OtPbu2mje2c)
+
+Overall score overall structure
