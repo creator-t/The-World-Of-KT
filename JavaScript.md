@@ -669,3 +669,9 @@ wmic path softwarelicensingservice get OA3xOriginalProductKey
 # [Pyramid Principle](https://www.youtube.com/watch?v=OtPbu2mje2c)
 
 Overall score overall structure
+
+# 2022/12/08
+leetcode 每日一题完成
+买了华为的云服务器 准备先来搭建博客（哔哩哔哩上的鱼皮） 使用宝塔 对于宝塔的端口（需要在安全组中开放8888、888、80、443、20和21端口）
+VPN的使用 飞鸟云 [防失联链接]：(https://feiniaoyun.gitbook.io/fabu/)
+clash for windows 工具使用
