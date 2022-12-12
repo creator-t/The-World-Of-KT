@@ -679,3 +679,35 @@ clash for windows 工具使用
 # maven的安装和配置
 Windows下载zip文件解压
 在conf文件中配置仓库以及本地仓库的存储位置
+
+# spring & spring boot
+开始一个web项目start.spring.io
+spring 的核心IoC 和 Aop
+IoC：inversion of control 控制反转 采用Dependencies Injection 依赖注入的思想
+不需要程序员自己去手动的去实例化bean，程序员只需要通过注解的方式提供要实例化的bean和相应的配置就可以去让spring容器去实例化。
+2022-12-12 学到的注解
+```
+
+//配置类，一般是程序的入口用这个注解，一般的配置类使用Configuration
+SpringBootApplication
+Configuration
+
+//对于要实例化的对象的配置
+Component("实例化的实例名,这四个都一样") //如果类在控制、业务以及数据库都有关，可以用Component注解
+        //后面的三个都是依赖于Component的，四者其实并没有本质的区别
+Controller //用于控制
+Service //关于业务
+Repository //用于操作数据库
+
+//对于第三方的类的实例化
+Bean
+public 想要实例化的类名 方法名（也就是spring实例化类后的实例名）{return new 想要实例化的类名()}
+
+//自动装配，将实例化的类赋值到需要的地方
+Autowired
+Qulifier("实例化后的实例名")
+
+/*@ContextConfiguration这个注解通常与@RunWith(SpringJUnit4ClassRunner.class)联合使用用来测试
+当一个类添加了注解@Component,那么他就自动变成了一个bean，就不需要再Spring配置文件中显示的配置了。把这些bean收集起来通常有两种方式，Java的方式和XML的方式。当这些bean收集起来之后，当我们想要在某个测试类使用@Autowired注解来引入这些收集起来的bean时，只需要给这个测试类添加@ContextConfiguration注解来标注我们想要导入这个测试类的某些bean。*/
+ContextConfiguration(Class = ...(想要收集的实例化的bean))
+```
