@@ -699,6 +699,18 @@ Controller //用于控制
 Service //关于业务
 Repository //用于操作数据库
 
+//当一个接口有两个实现类的时候使用Primary的注解生命spring实现返回哪个bean的实例
+Primary
+
+//生命bean的初始化方法，和构造方法不同，构造方法会先执行
+PostConstruct
+
+//声明bean的销毁方法。在销毁实例前执行
+PreDestroy
+
+//实例化单例：singleton还是多例：prototype
+Scope("singleton") 
+
 //对于第三方的类的实例化
 Bean
 public 想要实例化的类名 方法名（也就是spring实例化类后的实例名）{return new 想要实例化的类名()}
@@ -710,4 +722,10 @@ Qulifier("实例化后的实例名")
 /*@ContextConfiguration这个注解通常与@RunWith(SpringJUnit4ClassRunner.class)联合使用用来测试
 当一个类添加了注解@Component,那么他就自动变成了一个bean，就不需要再Spring配置文件中显示的配置了。把这些bean收集起来通常有两种方式，Java的方式和XML的方式。当这些bean收集起来之后，当我们想要在某个测试类使用@Autowired注解来引入这些收集起来的bean时，只需要给这个测试类添加@ContextConfiguration注解来标注我们想要导入这个测试类的某些bean。*/
 ContextConfiguration(Class = ...(想要收集的实例化的bean))
+
+//访问路径
+RequestMapping("/path")
+
+//返回响应体
+ResponseBody
 ```
