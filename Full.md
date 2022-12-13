@@ -728,8 +728,8 @@ ContextConfiguration(Class = ...(想要收集的实例化的bean))
 
 其他所有的spring XXX都是基于spring的核心IoC和AOP
 
-项目分为Controller 、 Service 、 Repository
-MVC是一种思想，主要体现在Controller的部分，Model View Controller
+服务器三层架构分为表现层（Controller） 、业务层（Service） 、 数据层（Repository）
+MVC是一种思想，主要体现在表现层的部分，Model View Controller
 Controller将从service得到的model给view，最后view将用model处理后的view传给controller，最后再传到用户界面
 ![spring mvc 模式图](https://user-images.githubusercontent.com/83005912/207338154-9a92958d-760e-4b8c-96ea-6cd285fcbb71.png)
 
@@ -797,7 +797,7 @@ ResponseBody
 		
 	}
         
-//返回JSON
+//返回JSON（常用于异步）
 @RequestMapping(path = "/emps", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Map<String, Object>> getEmps() {
