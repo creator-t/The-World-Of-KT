@@ -680,7 +680,7 @@ clash for windows 工具使用
 Windows下载zip文件解压
 在conf文件中配置仓库以及本地仓库的存储位置
 
-# spring & spring boot
+# [spring & spring boot](https://spring.io/)
 开始一个web项目start.spring.io
 spring 的核心IoC 和 Aop
 IoC：inversion of control 控制反转 采用Dependencies Injection 依赖注入的思想
@@ -723,9 +723,105 @@ Qulifier("实例化后的实例名")
 当一个类添加了注解@Component,那么他就自动变成了一个bean，就不需要再Spring配置文件中显示的配置了。把这些bean收集起来通常有两种方式，Java的方式和XML的方式。当这些bean收集起来之后，当我们想要在某个测试类使用@Autowired注解来引入这些收集起来的bean时，只需要给这个测试类添加@ContextConfiguration注解来标注我们想要导入这个测试类的某些bean。*/
 ContextConfiguration(Class = ...(想要收集的实例化的bean))
 
-//访问路径
-RequestMapping("/path")
-
-//返回响应体
-ResponseBody
 ```
+# spring MVC
+
+其他所有的spring XXX都是基于spring的核心IoC和AOP
+
+项目分为Controller 、 Service 、 Repository
+MVC是一种思想，主要体现在Controller的部分，Model View Controller
+Controller将从service得到的model给view，最后view将用model处理后的view传给controller，最后再传到用户界面
+![spring mvc 模式图](https://user-images.githubusercontent.com/83005912/207338154-9a92958d-760e-4b8c-96ea-6cd285fcbb71.png)
+
+核心部件是dispatcherservlet，它会根据配置信息将路径分配到对应的controller类上，model不用程序员自己来实例
+
+要实现动态的HTML还要借助渲染工具，最流行的是[thymeleaf](https://www.thymeleaf.org/) （由于thyme leaf是基于HTML的）
+在使用时候要传入model和模板
+
+学到的注解
+```
+//手动的实现
+@RequestMapping("/http")
+	public void http(HttpServletRequest request, HttpServletResponse response) {
+		//request
+		System.out.println(request.getMethod());
+		System.out.println(request.getContextPath());
+		Enumeration<String> names = request.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			String value = request.getHeader(name);
+			System.out.println(name + ": " + value);
+		}
+		System.out.println(request.getParameter("code"));
+		
+		//response
+		response.setContentType("text/html;charset=utf-8");
+		response.setStatus(200);
+		try (PrintWriter writer = response.getWriter()) {
+			writer.write("<h1>TK网</h1>");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+        
+//对应请求路径
+@RequestMapping("/alpha") //参数有path，method等
+@RequestMapping(path = "/students", method = RequestMethod.GET)
+
+//返回响应体（没有这个默认是返回HTML页面）
+ResponseBody
+
+//对应请求的参数（写在方法的参数里面）
+@RequestParam(name = "current", required = false, defaultValue = "1") int current
+
+//对应路径的参数（写在方法的参数里面）
+@PathVariable(name = "id", required = true) int id
+
+//动态HTML
+	@RequestMapping(path = "/teacher", method = RequestMethod.GET)
+	public ModelAndView getTeacher() {
+		ModelAndView mav = new ModelAndView();
+		mav.addObject("name", "张三");
+		mav.addObject("age", "23");
+		mav.setViewName("/demo/teacher");
+		return mav;
+		
+	}
+        //较为简单的实现，效果一样
+        @RequestMapping(path = "/school", method = RequestMethod.GET)
+	public String getSchool(Model model) {
+		model.addAttribute("name", "北京大学");
+		model.addAttribute("age", 80);
+		return "/demo/teacher";
+		
+	}
+        
+//返回JSON
+@RequestMapping(path = "/emps", method = RequestMethod.GET)
+	@ResponseBody
+	public List<Map<String, Object>> getEmps() {
+		List<Map<String, Object>> list = new ArrayList<>();
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("name", "张三");
+		map.put("age", 20);
+		map.put("salary", 8000.00);
+		list.add(map);
+		
+		map = new HashMap<String, Object>();
+		map.put("name", "李四");
+		map.put("age", 31);
+		map.put("salary", 10000.00);
+		list.add(map);
+		
+		return list;
+		
+		
+	}
+```
+
+## 关于application.properties
+设置相关类的属性的值
+[常用到的一些配置](https://docs.spring.io/spring-boot/docs/2.1.1.RELEASE/reference/htmlsingle/#common-application-properties)
+
