@@ -822,6 +822,325 @@ ResponseBody
 ```
 
 ## 关于application.properties
+
 设置相关类的属性的值
 [常用到的一些配置](https://docs.spring.io/spring-boot/docs/2.1.1.RELEASE/reference/htmlsingle/#common-application-properties)
 
+# 关于Mybatis
+
+## Mybatis是什么
+
+MyBatis是一个持久层框架，用于将Java应用程序与数据库连接。它使用SQL映射器来简化持久层代码，使用XML或注解来配置SQL语句。这样，开发人员就可以专注于业务逻辑，而不必担心复杂的数据访问代码。MyBatis还提供了一种称为动态SQL的机制，可以动态生成SQL语句，使得开发人员可以创建复杂的查询。MyBatis是一个开源框架，可以免费使用。
+
+## Mybatis的核心机制
+
+MyBatis的核心机制包括以下几个方面：
+
+- SQL映射器：MyBatis使用SQL映射器将SQL语句与Java方法相关联。这样，开发人员就可以通过调用Java方法来执行SQL语句，而不必写复杂的数据访问代码。
+
+- 动态SQL：MyBatis提供了一种称为动态SQL的机制，可以动态生成SQL语句。这使得开发人员可以创建复杂的查询，并且可以根据应用程序的需要动态地更改SQL语句。
+
+- 数据映射器：MyBatis使用数据映射器将数据库记录与Java对象相关联。这样，开发人员就可以使用Java对象来访问数据库记录，而不必写复杂的数据访问代码。
+
+- 会话工厂：MyBatis使用会话工厂管理数据库连接。开发人员可以通过调用会话工厂的方法来获取数据库连接，并且可以在使用完数据库连接后将其关闭。
+
+- 缓存：MyBatis提供了一个二级缓存机制，可以提高查询性能。缓存可以缓存常用的SQL查询结果，避免重复执行SQL语句。
+
+## Mybatis Spring比Mybatis好在哪里
+
+Mybatis Spring是对Mybatis的一种封装，它将Mybatis整合到Spring框架中。使用Mybatis Spring可以享受Spring框架的众多优势，这些优势包括：
+
+- Spring管理Mybatis的会话工厂：在Spring中使用Mybatis时，可以使用Spring管理Mybatis的会话工厂，从而简化代码并减少错误。
+
+- Spring管理数据源：使用Mybatis Spring时，可以使用Spring管理数据源，从而简化代码并减少错误。
+
+- Spring管理事务：使用Mybatis Spring时，可以使用Spring管理事务，从而简化代码并减少错误。
+
+- 使用Spring的依赖注入：使用Mybatis Spring时，可以使用Spring的依赖注入机制，从而简化代码并减少错误。
+
+- 使用Spring的AOP机制：使用Mybatis Spring时，可以使用Spring的AOP机制，从而在执行数据库操作时实现更复杂的功能。
+
+总之，使用Mybatis Spring可以简化代码，减少错误，并使用Spring框架的众多优势。
+
+## 如何使用Mybatis
+
+- 在pom.xml文件中导入MySQL和Mybatis的依赖
+```
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.0.31</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+```
+- 在application.properties文件中配置数据库连接池和Mybatis的相关内容
+```
+# DataSourceProperties
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:mysql://localhost:3306/community
+spring.datasource.username=root
+spring.datasource.password=123456
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.type=com.zaxxer.hikari.HikariDataSource
+spring.datasource.hikari.maximum-pool-size=15
+spring.datasource.hikari.minimum-idle=15
+spring.datasource.hikari.minimum-idle-timeout=30000
+
+
+# MybatisProperties
+mybatis.mapper-locations=classpath:mapper/*.xml
+mybatis.type-aliases-package=com.tk.community.entity
+mybatis.configuration.map-underscore-to-camel-case=true
+mybatis.configuration.use-generated-keys=true
+#mybatis.configuration.default-fetch-size=100
+#mybatis.configuration.default-statement-timeout=30
+```
+- 创建实体类
+```
+public class User {
+	
+	private int id;
+	private String username;
+	private String password;
+	private String salt;
+	
+	private String email;
+	private int type;
+	private int status;
+	private String activationCode;
+	private String headerUrl;
+	private Date createTime;
+public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public String getUsername() {
+		return username;
+	}
+	
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+	
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	public String getSalt() {
+		return salt;
+	}
+	
+	public void setSalt(String salt) {
+		this.salt = salt;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+	
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
+	public int getType() {
+		return type;
+	}
+	
+	public void setType(int type) {
+		this.type = type;
+	}
+	
+	public int getStatus() {
+		return status;
+	}
+	
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	
+	public String getActivationCode() {
+		return activationCode;
+	}
+	
+	public void setActivationCode(String activationCode) {
+		this.activationCode = activationCode;
+	}
+	
+	public String getHeaderUrl() {
+		return headerUrl;
+	}
+	
+	public void setHeaderUrl(String headerUrl) {
+		this.headerUrl = headerUrl;
+	}
+	
+	public Date getCreateTime() {
+		return createTime;
+	}
+	
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+	
+	@Override
+	public String toString() {
+		return "User{" +
+				       "id=" + id +
+				       ", username='" + username + '\'' +
+				       ", password='" + password + '\'' +
+				       ", salt='" + salt + '\'' +
+				       ", type=" + type +
+				       ", status=" + status +
+				       ", activationCode='" + activationCode + '\'' +
+				       ", headerUrl='" + headerUrl + '\'' +
+				       ", createTime=" + createTime +
+				       '}';
+	}
+}
+```
+- 创建DAO（Data Access Object)
+```
+package com.tk.community.dao;
+
+import com.tk.community.entity.User;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface UserMapper {
+	
+	User selectById(int id);
+	
+	User selectByName(String username);
+	
+	User selectByEmail(String email);
+	
+	int insertUser(User user);
+	
+	int updateStatus(int id, int status);
+	
+	int updateHeader(int id,String headerUrl);
+	
+	int updatePassword(int id,String password);
+}
+```
+- 在resources的mapper下创建相关的 .xml文件
+```
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.community.dao.UserMapper">
+
+    <sql id="selectFields">id,username,password,salt,email,type,status,activation_code,header_url,create_time</sql>
+
+    <sql id="insertFields">username,password,salt,email,type,status,activation_code,header_url,create_time</sql>
+
+    <select id="selectById" resultType="User">
+        SELECT
+        <include refid="selectFields"></include>
+        FROM user
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByName" resultType="User">
+        SELECT
+        <include refid="selectFields"></include>
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectByEmail" resultType="User">
+        SELECT
+        <include refid="selectFields"></include>
+        FROM user
+        WHERE email = #{email}
+    </select>
+
+
+    <insert id="insertUser" parameterType="User" keyProperty="id">
+        insert into user (<include refid="insertFields"></include>)
+        values(#{username},#{password},#{salt},#{email},#{type},#{status},#{activationCode},#{headerUrl},#{createTime})
+    </insert>
+
+
+    <update id="updateStatus">
+        update user set status = #{status} where id = #{id}
+    </update>
+
+    <update id="updateHeader">
+        update user set header_url = #{headerUrl} where id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update user set password = #{password} where id = #{id}
+    </update>
+
+</mapper>
+```
+- 最后是在service中调用DAO的接口
+```
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tk.community.dao.UserMapper">
+
+    <sql id="selectFields">id,username,password,salt,email,type,status,activation_code,header_url,create_time</sql>
+
+    <sql id="insertFields">username,password,salt,email,type,status,activation_code,header_url,create_time</sql>
+
+    <select id="selectById" resultType="User">
+        SELECT
+        <include refid="selectFields"></include>
+        FROM user
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByName" resultType="User">
+        SELECT
+        <include refid="selectFields"></include>
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectByEmail" resultType="User">
+        SELECT
+        <include refid="selectFields"></include>
+        FROM user
+        WHERE email = #{email}
+    </select>
+
+
+    <insert id="insertUser" parameterType="User" keyProperty="id">
+        insert into user (<include refid="insertFields"></include>)
+        values(#{username},#{password},#{salt},#{email},#{type},#{status},#{activationCode},#{headerUrl},#{createTime})
+    </insert>
+
+
+    <update id="updateStatus">
+        update user set status = #{status} where id = #{id}
+    </update>
+
+    <update id="updateHeader">
+        update user set header_url = #{headerUrl} where id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update user set password = #{password} where id = #{id}
+    </update>
+
+</mapper>
+```
