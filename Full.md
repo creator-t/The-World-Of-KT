@@ -900,7 +900,9 @@ mybatis.configuration.use-generated-keys=true
 #mybatis.configuration.default-fetch-size=100
 #mybatis.configuration.default-statement-timeout=30
 ```
+
 - 创建实体类
+
 ```
 public class User {
 	
@@ -1011,7 +1013,9 @@ public int getId() {
 	}
 }
 ```
+
 - 创建DAO（Data Access Object)
+
 ```
 package com.tk.community.dao;
 
@@ -1036,7 +1040,9 @@ public interface UserMapper {
 	int updatePassword(int id,String password);
 }
 ```
+
 - 在resources的mapper下创建相关的 .xml文件
+
 ```
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
@@ -1091,6 +1097,7 @@ public interface UserMapper {
 </mapper>
 ```
 - 最后是在service中调用DAO的接口
+
 ```
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
@@ -1143,4 +1150,150 @@ public interface UserMapper {
     </update>
 
 </mapper>
+```
+
+# Git版本控制
+
+- 下载git
+- 配置git
+```
+git config --list //显示目前所有的配置
+git config --global user.name "" user.email ""//配置用户名和邮箱
+```
+- 上传到本地
+```
+//进入想要上传的项目
+
+//初始化
+git init
+
+//将文件提交到暂存区
+git add ...
+
+//将暂存区中的文件提交到版本库中
+git commit -m "信息"
+```
+
+- 上传到远程
+```
+//生成密钥
+ssh-keygen -t rsa -C "1879783522@qq.com"
+
+//将密钥在远程上存储
+
+//链接远程
+git remote add origin <remote repository URL>
+
+//将本地的内容推送到远程
+git push -u origin master
+```
+
+# 使用邮件Mail
+
+- 在邮箱上开启POP3|SMTP服务
+- 在pom.xml中注入依赖
+```
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+```
+- 创建一个可以复用的utils类Mail（示例）
+```
+package com.tk.community.util;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MailClient {
+	
+	public static final Logger logger = LoggerFactory.getLogger(MailClient.class);
+	
+	
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	@Value("${spring.mail.username}")
+	private String from;
+	
+	public void sentMail(String to, String subject, String content) {
+		try {
+			MimeMessage mimeMessage = mailSender.createMimeMessage();
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+			mimeMessageHelper.setFrom(from);
+			mimeMessageHelper.setTo(to);
+			mimeMessageHelper.setSubject(subject);
+			mimeMessageHelper.setText(content, true);
+			mailSender.send(mimeMessageHelper.getMimeMessage());
+		} catch (MessagingException e) {
+			logger.error("发送邮件失败：" + e.getMessage());
+		}
+		
+	}
+}
+```
+- 使用MialClient
+```
+//测试类
+package com.tk.community.util;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MailClient {
+	
+	public static final Logger logger = LoggerFactory.getLogger(MailClient.class);
+	
+	
+	@Autowired
+	private JavaMailSender mailSender;
+	
+	@Value("${spring.mail.username}")
+	private String from;
+	
+	public void sentMail(String to, String subject, String content) {
+		try {
+			MimeMessage mimeMessage = mailSender.createMimeMessage();
+			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+			mimeMessageHelper.setFrom(from);
+			mimeMessageHelper.setTo(to);
+			mimeMessageHelper.setSubject(subject);
+			mimeMessageHelper.setText(content, true);
+			mailSender.send(mimeMessageHelper.getMimeMessage());
+		} catch (MessagingException e) {
+			logger.error("发送邮件失败：" + e.getMessage());
+		}
+		
+	}
+}
+//HTML模板（与thymeleaf相结合）
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo</title>
+</head>
+<body>
+    <div>Welcome to community <div style="color:red;" th:utext="${username}"></div></div>
+</body>
+</html>
 ```
