@@ -1297,3 +1297,14 @@ public class MailClient {
 </body>
 </html>
 ```
+
+# 注册功能
+
+- 注册页面
+
+```
+    @RequestMapping(path = "/register",method = RequestMethod.GET)
+	public String getRegisterPage(){
+		return "site/register";
+	}
+```
