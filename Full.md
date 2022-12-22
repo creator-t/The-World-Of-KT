@@ -1308,3 +1308,148 @@ public class MailClient {
 		return "site/register";
 	}
 ```
+
+- userService中的注册判断
+
+```
+    public Map<String, Object> register(User user) {
+		Map<String, Object> map = new HashMap<>();
+		
+		//空值处理
+		if (user == null) {
+			throw new IllegalArgumentException("参数不能为空！");
+		}
+		if (StringUtils.isBlank(user.getUsername())) {
+			map.put("usernameMsg", "账号不能为空！");
+		}
+		if (StringUtils.isBlank(user.getPassword())) {
+			map.put("passwordMsg", "密码不能为空！");
+		}
+		if (StringUtils.isBlank(user.getEmail())) {
+			map.put("emailMsg", "邮箱不能为空！");
+		}
+		
+		//验证账号
+		User u = userMapper.selectByName(user.getUsername());
+		if (u != null) {
+			map.put("usernameMsg", "该账号名已存在！");
+			return map;
+		}
+		
+		//验证邮箱
+		u = userMapper.selectByEmail(user.getEmail());
+		if (u != null) {
+			map.put("emailMsg", "该邮箱已被注册！");
+			return map;
+		}
+		
+		//注册用户
+		user.setSalt(CommunityUtil.generateUUID().substring(0, 5));
+		user.setPassword(CommunityUtil.md5(user.getPassword() + user.getSalt()));
+		user.setType(0);
+		user.setStatus(0);
+		user.setActivationCode(CommunityUtil.generateUUID());
+		user.setHeaderUrl(String.format("http://images.nowcoder.com/head/%dt.png", new Random().nextInt(1000)));
+		user.setCreateTime(new Date());
+		userMapper.insertUser(user);
+		
+		//激活邮件
+		Context context = new Context();
+		context.setVariable("email", user.getEmail());
+		String url = domain + contextPath + "/activation" + user.getId() + "/" + user.getActivationCode();
+		context.setVariable("url", url);
+		String content = templateEngine.process("/mail/activation", context);
+		mailClient.sentMail(user.getEmail(), "激活账号", content);
+		
+		return map;
+		
+	}
+```
+
+- 对于registerController
+
+```
+    @RequestMapping(path = "/register",method = RequestMethod.POST)
+	public String register(Model model, User user){
+		Map<String, Object> map = userService.register(user);
+		if (map == null || map.isEmpty()) {
+			model.addAttribute("msg","注册成功，我们已经向您的邮箱发送了一封激活邮件，请尽快激活！");
+			model.addAttribute("target","index");
+			return "/site/operate-result";
+			
+		}else {
+			model.addAttribute("usernameMsg",map.get("usernameMsg"));
+			model.addAttribute("passwordMsg",map.get("passwordMsg"));
+			model.addAttribute("emailMsg",map.get("emailMsg"));
+			return "/site/register";
+			
+		}
+		
+	}
+```
+
+- 对于register页面的逻辑
+
+```
+    <!-- 内容 -->
+		<div class="main">
+			<div class="container pl-5 pr-5 pt-3 pb-3 mt-3 mb-3">
+				<h3 class="text-center text-info border-bottom pb-3">注&nbsp;&nbsp;册</h3>
+				<form class="mt-5" method="post" th:action="@{/register}">
+					<div class="form-group row">
+						<label for="username" class="col-sm-2 col-form-label text-right">账号:</label>
+						<div class="col-sm-10">
+							<input type="text"
+								   th:class="|form-control ${usernameMsg!=null?'is-invalid':''}|"
+								   th:value="${user!=null?user.username:''}"
+								   id="username" name="username" placeholder="请输入您的账号!" required>
+							<div class="invalid-feedback" th:text="${usernameMsg}">
+								该账号已存在!
+							</div>
+						</div>
+					</div>
+					<div class="form-group row mt-4">
+						<label for="password" class="col-sm-2 col-form-label text-right">密码:</label>
+						<div class="col-sm-10">
+							<input type="password"
+								   th:class="|form-control ${passwordMsg!=null?'is-invalid':''}|"
+								   th:value="${user!=null?user.password:''}"
+								   id="password" name="password" placeholder="请输入您的密码!" required>
+							<div class="invalid-feedback" th:text="${passwordMsg}">
+								密码长度不能小于8位!
+							</div>							
+						</div>
+					</div>
+					<div class="form-group row mt-4">
+						<label for="confirm-password" class="col-sm-2 col-form-label text-right">确认密码:</label>
+						<div class="col-sm-10">
+							<input type="password" class="form-control"
+								   th:value="${user!=null?user.password:''}"
+								   id="confirm-password" placeholder="请再次输入密码!" required>
+							<div class="invalid-feedback">
+								两次输入的密码不一致!
+							</div>
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="email" class="col-sm-2 col-form-label text-right">邮箱:</label>
+						<div class="col-sm-10">
+							<input type="email"
+								   th:class="|form-control ${emailMsg!=null?'is-invalid':''}|"
+								   th:value="${user!=null?user.email:''}"
+								   id="email" name="email" placeholder="请输入您的邮箱!" required>
+							<div class="invalid-feedback" th:text="${emailMsg}">
+								该邮箱已注册!
+							</div>
+						</div>
+					</div>
+					<div class="form-group row mt-4">
+						<div class="col-sm-2"></div>
+						<div class="col-sm-10 text-center">
+							<button type="submit" class="btn btn-info text-white form-control">立即注册</button>
+						</div>
+					</div>
+				</form>				
+			</div>
+		</div>
+```
