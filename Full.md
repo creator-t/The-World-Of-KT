@@ -1535,4 +1535,82 @@ import java.util.Properties;
 </script>    
 ```
 
+# Cookie & Session
 
+Cookies and sessions are mechanisms that allow a website to store data on a user's device and retrieve it later. They are commonly used to store user preferences, track user activity, and provide a more personalized user experience.
+
+Cookies are small pieces of data that are stored on a user's device by a web browser. They are typically used to store user preferences and other information that needs to be persisted across multiple requests or visits to a website. Cookies are stored on the user's device and are sent back to the server with each request, allowing the server to access and use the stored data.
+
+Sessions, on the other hand, are used to store data on the server side. When a user visits a website, the server creates a unique session ID and stores the session data associated with that ID. The session ID is then typically stored in a cookie on the user's device, allowing the server to associate the session data with the user's requests.
+
+There are a few key differences between cookies and sessions:
+
+Storage location: Cookies are stored on the user's device, while sessions are stored on the server.
+
+Persistence: Cookies are persisted across multiple visits to a website, while sessions are typically only active for the duration of a single visit.
+
+Size: Cookies have a size limit of 4KB, while sessions can store much larger amounts of data.
+
+Security: Cookies are sent with every request, which means they can be accessed by anyone with access to the user's device. Sessions, on the other hand, are stored on the server and are generally more secure.
+
+Use cases: Cookies are commonly used to store user preferences, while sessions are typically used to store temporary data that is needed during a single visit to a website.
+
+In general, cookies are useful for storing small amounts of data that needs to be persisted across multiple visits to a website, while sessions are better suited for storing larger amounts of temporary data that is only needed during a single visit.
+
+Cookie 和会话是允许网站在用户设备上存储数据并在以后检索的机制。它们通常用于存储用户偏好、跟踪用户活动并提供更加个性化的用户体验。
+
+Cookie 是网络浏览器存储在用户设备上的小块数据。它们通常用于存储用户偏好和其他需要在多次请求或访问网站时保留的信息。 Cookie 存储在用户的设备上，并随每个请求发送回服务器，允许服务器访问和使用存储的数据。
+
+另一方面，会话用于在服务器端存储数据。当用户访问网站时，服务器会创建一个唯一的会话 ID 并存储与该 ID 关联的会话数据。然后会话 ID 通常存储在用户设备上的 cookie 中，允许服务器将会话数据与用户的请求相关联。
+
+Cookie 和会话之间存在一些主要区别：
+
+存储位置：Cookies存储在用户的设备上，而session则存储在服务器上。
+
+持久性：Cookie 在网站的多次访问中持续存在，而会话通常仅在单次访问期间处于活动状态。
+
+大小：Cookie 的大小限制为 4KB，而会话可以存储更多的数据。
+
+安全性：每次请求都会发送 Cookie，这意味着任何有权访问用户设备的人都可以访问它们。另一方面，会话存储在服务器上，通常更安全。
+
+用例：Cookie 通常用于存储用户偏好，而会话通常用于存储单次访问网站期间所需的临时数据。
+
+通常，cookie 可用于存储需要在多次访问网站时保留的少量数据，而会话更适合存储仅在单次访问期间需要的大量临时数据。
+
+## cookie的使用(spring中)
+```
+    @RequestMapping(path = "/cookie/set", method = RequestMethod.GET)
+	@ResponseBody
+	public String setCookie(HttpServletResponse response) {
+		Cookie cookie = new Cookie("code", CommunityUtil.generateUUID());
+		cookie.setPath("/community/alpha");
+		cookie.setMaxAge(600);
+		response.addCookie(cookie);
+		return "set cookie";
+	}
+	
+	@RequestMapping(path = "/cookie/get", method = RequestMethod.GET)
+	@ResponseBody
+	public String getCookie(@CookieValue("code") String code) {
+		return code;
+	}
+```
+## session的使用
+```
+    @RequestMapping(path = "/session/set", method = RequestMethod.GET)
+	@ResponseBody
+	public String setSession(HttpSession session) {
+		session.setAttribute("id", 123);
+		session.setAttribute("name", "test");
+		return "set session";
+	}
+	
+	@RequestMapping(path = "/session/get", method = RequestMethod.GET)
+	@ResponseBody
+	public String getSession(HttpSession session) {
+		Object id = session.getAttribute("id");
+		Object name = session.getAttribute("name");
+		System.out.println("id:" + id + "name:" + name);
+		return "get session";
+	}
+```
