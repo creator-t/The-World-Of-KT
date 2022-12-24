@@ -1614,3 +1614,415 @@ Cookie 和会话之间存在一些主要区别：
 		return "get session";
 	}
 ```
+
+# No primary or single unique constructor found for interface javax.servlet.http.HttpServletResponse问题解决
+
+将javax.servlet.http.HttpServletResponse导入包改为jakarta.servlet.http.HttpServletResponse;
+
+# 登录login的实现
+
+- 创建一个entity类，LoginTicket用于用户登录凭证表
+```
+package com.tk.community.entity;
+
+import java.util.Date;
+
+public class LoginTicket {
+	
+	private int id;
+	private int userId;
+	private String ticket;
+	private int status;
+	private Date expired;
+	
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public int getUserId() {
+		return userId;
+	}
+	
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+	
+	public String getTicket() {
+		return ticket;
+	}
+	
+	public void setTicket(String ticket) {
+		this.ticket = ticket;
+	}
+	
+	public int getStatus() {
+		return status;
+	}
+	
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	
+	public Date getExpired() {
+		return expired;
+	}
+	
+	public void setExpired(Date expired) {
+		this.expired = expired;
+	}
+	
+	@Override
+	public String toString() {
+		return "LoginTicket{" +
+				       "id=" + id +
+				       ", userId=" + userId +
+				       ", ticket='" + ticket + '\'' +
+				       ", status=" + status +
+				       ", expired=" + expired +
+				       '}';
+	}
+}
+```
+
+- 在数据库层：创建DAO
+```
+package com.tk.community.dao;
+
+import com.tk.community.entity.LoginTicket;
+import org.apache.ibatis.annotations.*;
+
+@Mapper
+public interface LoginTicketMapper {
+	@Insert({
+			"insert into login_ticket(user_id,ticket,status,expired) ",
+			"values(#{userId},#{ticket},#{status},#{expired})"
+	})
+	@Options(useGeneratedKeys = true,keyProperty = "id")
+	int insertLoginTicket(LoginTicket loginTicket);
+	@Select({
+					"select id,user_id,ticket,status,expired ",
+					"from login_ticket where ticket=#{ticket}"
+	})
+	LoginTicket selectByTicket(String ticket);
+    //实例在注解中如何使用if，所加内容无意义
+	@Update({
+					"<script>",
+					"update login_ticket set status=#{status} ",
+					"where ticket=#{ticket}",
+					"<if test=\"ticket!=null\"> ",
+					"and 1=1",
+					"</if>",
+					"</script>"
+	})
+	int updateStatus(String ticket,int status);
+}
+```
+- 在业务层：
+```
+    public Map<String, Object> login(String username, String password, long expiredSeconds) {
+		Map<String, Object> map = new HashMap<>();
+		
+		//空值处理
+		if (StringUtils.isBlank(username)) {
+			map.put("usernameMsg", "账号不能为空！");
+			return map;
+		}
+		if (StringUtils.isBlank(password)) {
+			map.put("passwordMsg", "密码不能为空！");
+			return map;
+		}
+		
+		//验证账号
+		User user = userMapper.selectByName(username);
+		if (user == null) {
+			map.put("usernameMsg", "账号不存在");
+			return map;
+		}
+		
+		//验证状态
+		if (user.getStatus() == 0) {
+			map.put("usernameMsg", "账号未激活");
+		}
+		
+		//验证密码
+		password = CommunityUtil.md5(password + user.getSalt());
+		assert password != null;
+		if (!password.equals(user.getPassword())) {
+			map.put("passwordMsg", "密码错误");
+			return map;
+		}
+		
+		LoginTicket loginTicket = new LoginTicket();
+		loginTicket.setUserId(user.getId());
+		loginTicket.setTicket(CommunityUtil.generateUUID());
+		loginTicket.setStatus(0);
+		loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000));
+		map.put("ticket",loginTicket.getTicket());
+		loginTicketMapper.insertLoginTicket(loginTicket);
+		
+		return map;
+	}
+```
+- 在控制层：
+```
+    @RequestMapping(path = "/login", method = RequestMethod.POST)
+	public String login(String username, String password, String code, boolean rememberme,
+	                    Model model, HttpSession session, HttpServletResponse response) {
+		// 检查验证码
+		String kaptcha = (String) session.getAttribute("kaptcha");
+		
+		if (StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !kaptcha.equalsIgnoreCase(code)) {
+			model.addAttribute("codeMsg", "验证码不正确!");
+			return "/site/login";
+		}
+		
+		// 检查账号,密码
+		int expiredSeconds = rememberme ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
+		Map<String, Object> map = userService.login(username, password, expiredSeconds);
+		if (map.containsKey("ticket")) {
+			Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
+			cookie.setPath(contextPath);
+			cookie.setMaxAge(expiredSeconds);
+			response.addCookie(cookie);
+			return "redirect:/index";
+		} else {
+			model.addAttribute("usernameMsg", map.get("usernameMsg"));
+			model.addAttribute("passwordMsg", map.get("passwordMsg"));
+			return "/site/login";
+		}
+	}
+```
+- thymeleaf模板
+```
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="https://static.nowcoder.com/images/logo_87_87.png"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          crossorigin="anonymous">
+    <link rel="stylesheet" th:href="@{/css/global.css}"/>
+    <link rel="stylesheet" th:href="@{/css/login.css}"/>
+    <title>牛客网-登录</title>
+</head>
+<body>
+<div class="nk-container">
+    <!-- 头部 -->
+    <header class="bg-dark sticky-top" th:replace="~{index::header}">
+        <div class="container">
+            <!-- 导航 -->
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <!-- logo -->
+                <a class="navbar-brand" href="#"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <!-- 功能 -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item ml-3 btn-group-vertical">
+                            <a class="nav-link" href="../index.html">首页</a>
+                        </li>
+                        <li class="nav-item ml-3 btn-group-vertical">
+                            <a class="nav-link position-relative" href="letter.html">消息<span
+                                    class="badge badge-danger">12</span></a>
+                        </li>
+                        <li class="nav-item ml-3 btn-group-vertical">
+                            <a class="nav-link" href="register.html">注册</a>
+                        </li>
+                        <li class="nav-item ml-3 btn-group-vertical">
+                            <a class="nav-link" href="login.html">登录</a>
+                        </li>
+                        <li class="nav-item ml-3 btn-group-vertical dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="http://images.nowcoder.com/head/1t.png" class="rounded-circle"
+                                     style="width:30px;"/>
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item text-center" href="profile.html">个人主页</a>
+                                <a class="dropdown-item text-center" href="setting.html">账号设置</a>
+                                <a class="dropdown-item text-center" href="login.html">退出登录</a>
+                                <div class="dropdown-divider"></div>
+                                <span class="dropdown-item text-center text-secondary">nowcoder</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <!-- 搜索 -->
+                    <form class="form-inline my-2 my-lg-0" action="search.html">
+                        <input class="form-control mr-sm-2" type="search" aria-label="Search"/>
+                        <button class="btn btn-outline-light my-2 my-sm-0" type="submit">搜索</button>
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 内容 -->
+    <div class="main">
+        <div class="container pl-5 pr-5 pt-3 pb-3 mt-3 mb-3">
+            <h3 class="text-center text-info border-bottom pb-3">登&nbsp;&nbsp;录</h3>
+            <form class="mt-5" method="post" th:action="@{/login}">
+                <div class="form-group row">
+                    <label for="username" class="col-sm-2 col-form-label text-right">账号:</label>
+                    <div class="col-sm-10">
+                        <input type="text" th:class="|form-control ${usernameMsg!=null?'is-invalid':''}|"
+                               th:value="${param.username}"
+                               name="username" id="username" placeholder="请输入您的账号!"
+                               required>
+                        <div class="invalid-feedback" th:text="${usernameMsg}">
+                            该账号不存在!
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row mt-4">
+                    <label for="password" class="col-sm-2 col-form-label text-right">密码:</label>
+                    <div class="col-sm-10">
+                        <input type="password" th:class="|form-control ${passwordMsg!=null?'is-invalid':''}|"
+                               th:value="${param.password}"
+                               name="password" id="password"
+                               placeholder="请输入您的密码!" required>
+                        <div class="invalid-feedback" th:text="${passwordMsg}">
+                            密码长度不能小于8位!
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row mt-4">
+                    <label for="verifycode" class="col-sm-2 col-form-label text-right">验证码:</label>
+                    <div class="col-sm-6">
+                        <input type="text" th:class="|form-control ${codeMsg!=null?'is-invalid':''}|"
+                               name="code" id="verifycode" placeholder="请输入验证码!">
+                        <div class="invalid-feedback" th:text="${codeMsg}">
+                            验证码不正确!
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <img th:src="@{/kaptcha}" id="kaptcha" style="width:100px;height:40px;" class="mr-2"/>
+                        <a href="javascript:refresh_kaptcha();" class="font-size-12 align-bottom">刷新验证码</a>
+                    </div>
+                </div>
+                <div class="form-group row mt-4">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-10">
+                        <input type="checkbox" id="remember-me" name="rememberme" th:checked="${param.rememberme}">
+                        <label class="form-check-label" for="remember-me">记住我</label>
+                        <a href="forget.html" class="text-danger float-right">忘记密码?</a>
+                    </div>
+                </div>
+                <div class="form-group row mt-4">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-10 text-center">
+                        <button type="submit" class="btn btn-info text-white form-control">立即登录</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 尾部 -->
+    <footer class="bg-dark">
+        <div class="container">
+            <div class="row">
+                <!-- 二维码 -->
+                <div class="col-4 qrcode">
+                    <img src="https://uploadfiles.nowcoder.com/app/app_download.png" class="img-thumbnail"
+                         style="width:136px;"/>
+                </div>
+                <!-- 公司信息 -->
+                <div class="col-8 detail-info">
+                    <div class="row">
+                        <div class="col">
+                            <ul class="nav">
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">关于我们</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">加入我们</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">意见反馈</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">企业服务</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">联系我们</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">免责声明</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-light" href="#">友情链接</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <ul class="nav btn-group-vertical company-info">
+                                <li class="nav-item text-white-50">
+                                    公司地址：北京市朝阳区大屯路东金泉时代3-2708北京牛客科技有限公司
+                                </li>
+                                <li class="nav-item text-white-50">
+                                    联系方式：010-60728802(电话)&nbsp;&nbsp;&nbsp;&nbsp;admin@nowcoder.com
+                                </li>
+                                <li class="nav-item text-white-50">
+                                    牛客科技©2018 All rights reserved
+                                </li>
+                                <li class="nav-item text-white-50">
+                                    京ICP备14055008号-4 &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <img src="http://static.nowcoder.com/company/images/res/ghs.png"
+                                         style="width:18px;"/>
+                                    京公网安备 11010502036488号
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/js/global.js}"></script>
+<script>
+    function refresh_kaptcha(){
+        var path = CONTEXT_PATH + "/kaptcha?p=" + Math.random();
+        $("#kaptcha").attr("src",path);
+    }
+
+
+
+
+</script>
+</body>
+</html>
+```
+
+# 退出登录
+- 数据库层在登录中已经设计
+- 业务层
+```
+    public void logout(String ticket) {
+		loginTicketMapper.updateStatus(ticket, 1);
+		
+	}
+```
+- 控制层
+```
+    @RequestMapping(path = "/logout", method = RequestMethod.GET)
+	public String logout(@CookieValue("ticket") String ticket) {
+		userService.logout(ticket);
+		return "redirect:/login";
+	}
+```
