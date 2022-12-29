@@ -2026,3 +2026,64 @@ public interface LoginTicketMapper {
 		return "redirect:/login";
 	}
 ```
+
+# 配置拦截器，
+
+- 创建拦截类
+```
+package com.tk.community.controller.interceptor;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+@Component
+public class AlphaInterceptor implements HandlerInterceptor {
+	
+	private static final Logger logger = LoggerFactory.getLogger(AlphaInterceptor.class);
+	
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+		logger.debug("preHandle: " + handler.toString());
+		return true;
+	}
+	
+	@Override
+	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+		logger.debug("postHandle: " + handler.toString());
+		System.out.println();
+	}
+	
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+		logger.debug("afterCompletion: " + handler.toString());
+	}
+}
+```
+- 配置拦截器
+```
+package com.tk.community.config;
+
+import com.tk.community.controller.interceptor.AlphaInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
+	@Autowired
+	private AlphaInterceptor alphaInterceptor ;
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(alphaInterceptor)
+				.excludePathPatterns("/**/*.css","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg")
+				.addPathPatterns("/register","/login");
+	}
+}
+```
